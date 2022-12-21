@@ -63,7 +63,7 @@ const Parent = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   let isSubscription = true;
-  let isAdult = true
+  let isAdult = true;
 
   const sortingOptions = isSubscription
     ? [
@@ -96,102 +96,69 @@ const Parent = () => {
   const sortCurrentProducts = (sortingVal: string) => {
     switch (sortingVal) {
       case "Price Low to High":
-        filtered = sortPrice_Low2High(filtered, "highToLow");
+        filtered = sortByPrice(filtered, true);
         dispatch({ type: "SORT_FILTER", payload: filtered });
         break;
 
       case "Price High to Low":
-        filtered = sortPrice_High2Low(filtered);
+        filtered = sortByPrice(filtered, false);
         dispatch({ type: "SORT_FILTER", payload: filtered });
         break;
 
       case "Inner Leg Low to High":
-        filtered = sort_Meta_Low2High(filtered, "leg-min");
+        filtered = sortByMetafield(filtered, "leg-min", true);
         dispatch({ type: "SORT_FILTER", payload: filtered });
         break;
 
       case "Inner Leg High to Low":
-        filtered = sort_Meta_High2Low(filtered, "leg-min");
+        filtered = sortByMetafield(filtered, "leg-min", false);
         dispatch({ type: "SORT_FILTER", payload: filtered });
         break;
 
       case "Bike Weight Low to High":
-        filtered = sort_Meta_Low2High(filtered, "weight");
+        filtered = sortByMetafield(filtered, "weight", true);
         dispatch({ type: "SORT_FILTER", payload: filtered });
         break;
 
       case "Bike Weight High to Low":
-        filtered = sort_Meta_High2Low(filtered, "weight");
+        filtered = sortByMetafield(filtered, "weight", false);
         dispatch({ type: "SORT_FILTER", payload: filtered });
         break;
     }
   };
 
-  const sortPrice_Low2High = (data: IProductNode[], order: string) => {
+  const sortByPrice = (data: IProductNode[], asc: boolean) => {
     return [...data].sort((a, b) => {
       const numberA = a.node.priceRange.maxVariantPrice.amount;
       const numberB = b.node.priceRange.maxVariantPrice.amount;
 
       if (numberA < numberB) {
-        return -1;
+        return asc ? -1 : 1;
       }
       if (numberA > numberB) {
-        return 1;
-      }
-      return 0;
-    });
-  };
-
-  const sortPrice_High2Low = (data: IProductNode[]) => {
-    const data2 = [...data];
-    return data2.sort((a, b) => {
-      const numberA = +a.node.priceRange.maxVariantPrice.amount;
-      const numberB = +b.node.priceRange.maxVariantPrice.amount;
-      if (numberA < numberB) {
-        return 1;
-      }
-      if (numberA > numberB) {
-        return -1;
+        return asc ? 1 : -1;
       }
       return 0;
     });
   };
 
   // SORTING FUNCTIONS for inner leg & bike weight - can be used for any metafield
-  const sort_Meta_Low2High = (data: IProductNode[], metaFieldKey: string) => {
+  const sortByMetafield = (
+    data: IProductNode[],
+    metaFieldKey: string,
+    asc: boolean
+  ) => {
     return [...data].sort((a, b) => {
       const metafieldA = findMetafield(a.node.metafields, metaFieldKey);
       const metafieldB = findMetafield(b.node.metafields, metaFieldKey);
       const numberA = metafieldA && +metafieldA?.value;
       const numberB = metafieldB && +metafieldB?.value;
       if (numberA && numberB) {
-        if (numberA > numberB) {
-          return 1;
-        }
         if (numberA < numberB) {
-          return -1;
+          return asc ? -1 : 1;
         }
-      }
-      return 0;
-    });
-  };
-
-  const metafieldHighToLow = 1;
-
-  const sort_Meta_High2Low = (data: IProductNode[], metaFieldKey: string) => {
-    const data2 = [...data];
-    return data2.sort((a, b) => {
-      const metafieldA = findMetafield(a.node.metafields, metaFieldKey);
-      const metafieldB = findMetafield(b.node.metafields, metaFieldKey);
-      const numberA = metafieldA && +metafieldA?.value;
-      const numberB = metafieldB && +metafieldB?.value;
-
-      if (numberA && numberB) {
         if (numberA > numberB) {
-          return -1;
-        }
-        if (numberA < numberB) {
-          return 1;
+          return asc ? 1 : -1;
         }
       }
       return 0;
@@ -216,7 +183,13 @@ const Parent = () => {
       </select>
       <ul>
         {state.currentProducts.map((product: any) => (
-          <li>{product.node.title}</li>
+          <>
+            <li>
+              {product.node.title} |{"    "}
+              {product.node.priceRange.maxVariantPrice.amount}
+            </li>
+            <br />
+          </>
         ))}
       </ul>
     </div>
