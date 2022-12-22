@@ -129,8 +129,8 @@ const Parent = () => {
 
   const sortByPrice = (data: IProductNode[], asc: boolean) => {
     return [...data].sort((a, b) => {
-      const numberA = a.node.priceRange.maxVariantPrice.amount;
-      const numberB = b.node.priceRange.maxVariantPrice.amount;
+      const numberA = parseFloat(a.node.priceRange.maxVariantPrice.amount);
+      const numberB = parseFloat(b.node.priceRange.maxVariantPrice.amount);
 
       if (numberA < numberB) {
         return asc ? -1 : 1;
@@ -185,7 +185,7 @@ const Parent = () => {
         {state.currentProducts.map((product: any) => (
           <>
             <li>
-              {product.node.title} |{"    "}
+              {product.node.title} |{" "}
               {product.node.priceRange.maxVariantPrice.amount}
             </li>
             <br />
