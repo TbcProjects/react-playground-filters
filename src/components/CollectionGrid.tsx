@@ -1,6 +1,6 @@
 import { useReducer, useEffect } from "react";
 import { products } from "../data/data";
-import { IProductNode } from "../types/general";
+import { IProductNode, IFilterCheckboxDropdown } from "../types/general";
 import {
   findMetafield,
   sortByPrice,
@@ -11,33 +11,23 @@ import {
 } from "../helpers/helpers";
 
 import ProductCard from "./ProductCard";
-import Filters from "./Filters";
+import FiltersGrid from "./FiltersGrid";
 
-import {
-  Accordion,
-  AccordionButton,
-  AccordionItem,
-  AccordionPanel,
-  AccordionIcon,
-  Box,
-  Button,
-  Container,
-  SimpleGrid,
-} from "@chakra-ui/react";
+import { Container, SimpleGrid } from "@chakra-ui/react";
 
 const initialState = {
-  checkedColors: [],
+  currentProducts: [],
   checkedBrands: [],
+  checkedColors: [],
+  checkedCondition: [],
   checkedWheels: [],
   checkedSizes: [],
-  checkedCondition: [],
   selectedInnerLeg: [],
   selectedAge: [],
   selectedHeight: [],
-  numOfFilters: 0,
-  penAccordionIndex: -1,
+  numOfFilters: 5,
+  openAccordionIndex: -1,
   isClearedAll: false,
-  currentProducts: [],
 };
 
 const reducer = (state: any, action: any) => {
@@ -52,30 +42,40 @@ const reducer = (state: any, action: any) => {
         ...state,
         numOfFilters: action.payload,
       };
-    case "INCREMENT_COUNT":
+    case "SELECT_FILTER":
       return {
         ...state,
-        numOfFilters: state.numOfFilters++,
+        [action.payload.name]: [
+          ...state[action.payload.name],
+          action.payload.value,
+        ],
       };
-    case "CLEAR_FILTERS":
+    case "OPEN_ACCORDION":
       return {
         ...state,
-        checkedColors: [],
-        checkedBrands: [],
-        checkedWheels: [],
-        checkedSizes: [],
-        checkedCondition: [],
-        selectedInnerLeg: [],
-        selectedAge: [],
-        selectedHeight: [],
-        sortingVal: "",
-        numOfFilters: 0,
-        currentProducts: [],
+        openAccordionIndex: action.payload,
       };
     case "SORT_FILTER":
       return {
         ...state,
         currentProducts: [...action.payload],
+      };
+    case "CLEAR_FILTER":
+      return {
+        ...state,
+        [action.payload]: [],
+      };
+    case "CLEAR_ALL_FILTERS":
+      return {
+        ...state,
+        checkedBrands: [],
+        checkedColors: [],
+        checkedCondition: [],
+        checkedWheels: [],
+        checkedSizes: [],
+        selectedInnerLeg: [],
+        selectedAge: [],
+        selectedHeight: [],
       };
     default:
       return state;
@@ -86,31 +86,18 @@ const CollectionGrid = () => {
   const [state, dispatch] = useReducer(reducer, initialState);
 
   let isSubscription = true;
-  let isAdult = true;
+  let isAdult = false;
 
   const productsAvailable = products.filter(elem => elem.node.availableForSale);
-
-  let filterCount = 0;
 
   useEffect(() => {
     dispatch({
       type: "INITIAL_DATA",
       payload: {
         currentProducts: [...productsAvailable],
-        numOfFilters: filterCount,
       },
     });
   }, []);
-
-  const brandArr = generateArrayOfValues(state.currentProducts, "brand").sort();
-  const colorArr = generateArrayOfValues(
-    state.currentProducts,
-    "filter-colour"
-  ).sort();
-  const wheelSzArr = generateArrayOfValues(
-    state.currentProducts,
-    "wheel-size"
-  ).sort();
 
   const renderProductCards = state.currentProducts.map((product: any) => {
     const {
@@ -126,7 +113,7 @@ const CollectionGrid = () => {
 
   return (
     <Container maxW="900px" margin="0 auto">
-      <Filters
+      <FiltersGrid
         state={state}
         dispatch={dispatch}
         isSubscription={isSubscription}

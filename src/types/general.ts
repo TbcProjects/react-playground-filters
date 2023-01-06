@@ -45,3 +45,22 @@ export interface IVariantOptions {
   name: string;
   value: string;
 }
+
+export interface IFilterCheckboxDropdown {
+  type: 'dropdown';
+  key: string;
+  title: string;
+  resetValue: string,
+  options: string[];
+  setter: React.Dispatch<React.SetStateAction<string[]>>;
+}
+
+export interface IFilterInputDropdown {
+  type: 'input';
+  key: string;
+  title: string;
+  resetValue: string,
+  unit: string;
+  placeholder: string;
+  setter: React.Dispatch<React.SetStateAction<string>>;
+}
